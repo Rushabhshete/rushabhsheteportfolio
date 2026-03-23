@@ -45,12 +45,29 @@ const ContactSection = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast.success('Message sent successfully! I\'ll get back to you soon.');
-    setFormData({ name: '', email: '', message: '' });
-    setIsSubmitting(false);
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+      
+      const response = await fetch('https://formspree.io/f/mvzwjlbw', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Message sent successfully! I\'ll get back to you soon.');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Formspree error:', error);
+      toast.error('Failed to send message. Please try again or email me directly at rushabhshete188@gmail.com');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -141,6 +158,7 @@ const ContactSection = () => {
                   <input
                     type="text"
                     id="name"
+                    name="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
@@ -156,6 +174,7 @@ const ContactSection = () => {
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
@@ -170,6 +189,7 @@ const ContactSection = () => {
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={5}
